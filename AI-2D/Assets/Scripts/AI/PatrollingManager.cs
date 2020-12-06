@@ -17,6 +17,7 @@ public class PatrollingManager : MonoBehaviour
     public Button randomGeneratedPatrolButton;
     public Button followPatrolButton;
     public Button retreatPatrolButton;
+    public Button stealthPatrolButton;
 
     public Button debugModeButton;
     public Button shootingModeButton;
@@ -30,6 +31,7 @@ public class PatrollingManager : MonoBehaviour
         randomGeneratedPatrolButton.onClick.AddListener(RandomGeneratedPatrolButtonTask);
         followPatrolButton.onClick.AddListener(FollowPatrolButtonTask);
         retreatPatrolButton.onClick.AddListener(RetreatPatrolButtonTask);
+        stealthPatrolButton.onClick.AddListener(StealthPatrolButtonTask);
 
         debugModeButton.onClick.AddListener(DebugModeButtonTask);
         shootingModeButton.onClick.AddListener(ShootingModeButtonTask);
@@ -63,6 +65,12 @@ public class PatrollingManager : MonoBehaviour
     void RetreatPatrolButtonTask()
     {
         patrollingType = 5;
+    }
+
+    //Stealth Patrol
+    void StealthPatrolButtonTask()
+    {
+        patrollingType = 6;
     }
 
     //Turn On Debug Mode

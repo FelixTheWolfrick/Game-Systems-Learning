@@ -8,7 +8,13 @@ using UnityEngine;
 3. Go to randomly generated locations, not taken from a list of nodes/spots
 4. Follow player/some sort of moving character/object
 5. Run away from player/some sort of moving character/object
-6. 
+
+Patrol Add-Ons (Extra pieces that can be added onto the prior patrol aglorithms)
+6. Spin in place while looking for a character to walk into vision, can't see past walls
+7. When ai reaches certain points it'll jump onto or off of the platform
+ 
+Extra Addition: State Machine Scenario, taking different patrols and merging them into an example of a state machine 
+
 Notes: 
 - When swapping patrols, it'll take off where it left off
 - You can use debug option to see where the ai is moving to
@@ -27,13 +33,24 @@ public class PatrollingAlgorithms : MonoBehaviour
 
     //AI
     public GameObject manager;
+
     public float speed;
     public float startTime;
     private float waitTime;
+
     public GameObject bullet;
     public Vector3 lastPosition; //Position of Player When Bullet is Shot
     public float startShootTime;
     private float shootTime;
+
+    public Vector2 stealthLocation; //Position of Enemy While in Stealth Patrol
+    private bool centerAI;
+    private bool rotateAI;
+    public float rotationSpeed;
+    public float distance;
+    public LineRenderer lineOfSight; //View of AI in Stealth Mode
+    public Gradient redLine; //Color of lineOfSight When Hitting Something
+    public Gradient greenLine; //Color of lineOfSight When Not Hitting Anything
 
     //Debug
     public GameObject debugLocationMarker;
@@ -41,12 +58,28 @@ public class PatrollingAlgorithms : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Set Wait Time Between Moving to Next Location
         waitTime = startTime;
+
+        //Set Random Location
         randomLocation = Random.Range(0, locations.Length);
-        nodeLocation = 0;
         randomGeneratedLocation.transform.position = new Vector2(Random.Range(minX.transform.position.x, maxX.transform.position.x), Random.Range(minY.transform.position.y, maxY.transform.position.y));
-        debugLocationMarker.GetComponent<Renderer>().enabled = false;
+        
+        //Start at Beginning of locations Array
+        nodeLocation = 0;
+
+        //Set Wait Time Between Shooting Bullets
         shootTime = startShootTime;
+
+        //Stealth Example Variables
+        centerAI = true; //Move AI to Center of Screen
+        rotateAI = true; //Rotate in Place
+
+        //Ignore Collider on AI Itself
+        Physics2D.queriesStartInColliders = false;
+
+        //Automatically Turn Off Debug Mode at Start
+        debugLocationMarker.GetComponent<Renderer>().enabled = false;
     }
 
     // Update is called once per frame
@@ -56,7 +89,7 @@ public class PatrollingAlgorithms : MonoBehaviour
         GetPatrollingType();
 
         //Check To Shoot
-        if(manager.GetComponent<PatrollingManager>().shootingMode)
+        if(manager.GetComponent<PatrollingManager>().shootingMode && manager.GetComponent<PatrollingManager>().patrollingType != 6)
         {
             AIShoot();
         }
@@ -65,16 +98,25 @@ public class PatrollingAlgorithms : MonoBehaviour
     //AI Shoot
     void AIShoot()
     {
-        //Stop From Spamming Bullets
-        if (shootTime <= 0)
+        //Check If Stealth Mode Is On
+        if (manager.GetComponent<PatrollingManager>().patrollingType == 6)
         {
             lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
             Instantiate(bullet, transform.position, Quaternion.identity);
-            shootTime = startShootTime;
         }
         else
         {
-            shootTime -= Time.deltaTime;
+            //Stop From Spamming Bullets
+            if (shootTime <= 0)
+            {
+                lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
+                Instantiate(bullet, transform.position, Quaternion.identity);
+                shootTime = startShootTime;
+            }
+            else
+            {
+                shootTime -= Time.deltaTime;
+            }
         }
     }
 
@@ -98,6 +140,9 @@ public class PatrollingAlgorithms : MonoBehaviour
                 break;
             case 5:
                 RetreatPatrol();
+                break;
+            case 6:
+                StealthPatrolAddOn();
                 break;
             default:
                 Debug.Log("NO OPTION CHOSEN");
@@ -206,5 +251,46 @@ public class PatrollingAlgorithms : MonoBehaviour
             transform.position = Vector2.MoveTowards(transform.position, player.transform.position, -speed * Time.deltaTime);
             debugLocationMarker.transform.position = new Vector2(transform.position.x, transform.position.y);
         }
+    }
+
+    //Stealth Patron Add-On
+    void StealthPatrolAddOn()
+    {
+        //Center Character (If Wanted)
+        if(centerAI)
+        {
+            transform.position = new Vector2(0, 0);
+        }
+
+        //Spin Character Around (If Wanted)
+        if(rotateAI)
+        {
+            transform.Rotate(Vector3.forward * rotationSpeed * Time.deltaTime);
+        }
+
+        //Variables
+        RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.up, distance);
+
+        //Check If Hits Something
+        if(hitInfo.collider != null)
+        {
+            Debug.DrawLine(transform.position, hitInfo.point, Color.red);
+            lineOfSight.SetPosition(1, hitInfo.point);
+            lineOfSight.colorGradient = redLine;
+
+            //Shoot If Detecting Player
+            if(hitInfo.collider.CompareTag("DestroyableObject"))
+            {
+                AIShoot();
+            }
+        }
+        else
+        {
+            Debug.DrawLine(transform.position, transform.position + transform.up * distance, Color.green);
+            lineOfSight.SetPosition(1, transform.position + transform.up * distance);
+            lineOfSight.colorGradient = greenLine;
+        }
+
+        lineOfSight.SetPosition(0, transform.position);
     }
 }

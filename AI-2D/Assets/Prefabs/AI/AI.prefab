@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 3774750315593019876}
   - component: {fileID: 3774750315593019879}
   - component: {fileID: 3774750315593019878}
+  - component: {fileID: 5555017868710369188}
   m_Layer: 0
   m_Name: AI
   m_TagString: Untagged
@@ -72,7 +73,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: 21300000, guid: b698cdf7e76744b4481c5177dd70bae0, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2afd7940e737d314b8172b79548a1cce, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -95,22 +96,36 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 077a316109f815d4f85d3f22ebd46ecc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  locations:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  locations: []
   randomGeneratedLocation: {fileID: 0}
   minX: {fileID: 0}
   maxX: {fileID: 0}
   minY: {fileID: 0}
   maxY: {fileID: 0}
+  player: {fileID: 0}
   manager: {fileID: 0}
   speed: 10
   startTime: 1.5
+  bullet: {fileID: 0}
+  lastPosition: {x: 0, y: 0, z: 0}
+  startShootTime: 3
+  stealthLocation: {x: 0, y: 0}
+  rotationSpeed: 35
+  distance: 50
+  debugLocationMarker: {fileID: 0}
+--- !u!58 &5555017868710369188
+CircleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3774750315593019801}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0.30245876, y: 0.36007023}
+  serializedVersion: 2
+  m_Radius: 4.0494146
