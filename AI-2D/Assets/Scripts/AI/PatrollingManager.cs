@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PatrollingManager : MonoBehaviour
 {
@@ -17,10 +18,21 @@ public class PatrollingManager : MonoBehaviour
     public Button randomGeneratedPatrolButton;
     public Button followPatrolButton;
     public Button retreatPatrolButton;
-    public Button stealthPatrolButton;
+    public Button stealthPatrolAddOnButton;
+    public Button jumpingPatrolAddOnButton;
 
     public Button debugModeButton;
     public Button shootingModeButton;
+    public Button stateMachineExampleButton;
+    public Button infoButton;
+
+    public bool infoOn;
+    public GameObject[] infoUI;
+    private string stateMachineScene;
+
+    //Scene SetUp
+    public GameObject platformerSetUp;
+    public GameObject topDownSetUp;
 
     // Start is called before the first frame update
     void Start()
@@ -31,10 +43,37 @@ public class PatrollingManager : MonoBehaviour
         randomGeneratedPatrolButton.onClick.AddListener(RandomGeneratedPatrolButtonTask);
         followPatrolButton.onClick.AddListener(FollowPatrolButtonTask);
         retreatPatrolButton.onClick.AddListener(RetreatPatrolButtonTask);
-        stealthPatrolButton.onClick.AddListener(StealthPatrolButtonTask);
+        stealthPatrolAddOnButton.onClick.AddListener(StealthPatrolAddOnButtonTask);
+        jumpingPatrolAddOnButton.onClick.AddListener(JumpingPatrolAddOnButtonTask);
 
         debugModeButton.onClick.AddListener(DebugModeButtonTask);
         shootingModeButton.onClick.AddListener(ShootingModeButtonTask);
+        stateMachineExampleButton.onClick.AddListener(StateMachineExampleButtonTask);
+        infoButton.onClick.AddListener(InfoButtonTask);
+
+        infoOn = false;
+
+        stateMachineScene = "PatrollingAIExamples"; //Temp Scene
+    }
+
+    void Update()
+    {
+        SceneSetUp();
+    }
+
+    //Check if Jumping or Not (If jumping switch to jumping scene set-up)
+    void SceneSetUp()
+    {
+        if (patrollingType == 7) //Platformer Mode
+        {
+            platformerSetUp.SetActive(true);
+            topDownSetUp.SetActive(false);
+        }
+        else
+        {
+            platformerSetUp.SetActive(false);
+            topDownSetUp.SetActive(true);
+        }
     }
 
     //Selected Random Patrol
@@ -67,10 +106,16 @@ public class PatrollingManager : MonoBehaviour
         patrollingType = 5;
     }
 
-    //Stealth Patrol
-    void StealthPatrolButtonTask()
+    //Stealth Patrol Add-On
+    void StealthPatrolAddOnButtonTask()
     {
         patrollingType = 6;
+    }
+
+    //Jumping Patrol Add-On
+    void JumpingPatrolAddOnButtonTask()
+    {
+        patrollingType = 7;
     }
 
     //Turn On Debug Mode
@@ -98,6 +143,27 @@ public class PatrollingManager : MonoBehaviour
         else
         {
             shootingMode = true;
+        }
+    }
+
+    //Switch to State Nachine Examples
+    void StateMachineExampleButtonTask()
+    {
+        SceneManager.LoadScene(stateMachineScene);
+    }
+
+    //Turn On and Off Info Boxes
+    void InfoButtonTask()
+    {
+        if(infoOn)
+        {
+            infoOn = false;
+            infoUI[patrollingType].GetComponent<Renderer>().enabled = false;
+        }
+        else
+        {
+            infoOn = true;
+            infoUI[patrollingType].GetComponent<Renderer>().enabled = true;
         }
     }
 }

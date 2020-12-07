@@ -14,4 +14,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Shared Scenes/AI Options.unity
     guid: fc463985362e5b241b8d9234b6b3182d
+  - enabled: 1
+    path: Assets/Scenes/AI/PatrollingAIExamples.unity
+    guid: 83c5599ee2d1ade47921d6ebb8468e25
   m_configObjects: {}

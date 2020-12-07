@@ -30,11 +30,16 @@ public class PatrollingAlgorithms : MonoBehaviour
     public GameObject randomGeneratedLocation;
     public GameObject minX, maxX, minY, maxY; //Game Boundries
     public GameObject player;
+    public Transform[] jumpLocations;
+    private int jumpNodeLocation; //Location in jumpLocations array
 
     //AI
     public GameObject manager;
+    public GameObject stateMachine;
 
     public float speed;
+    public float jumpHeight;
+
     public float startTime;
     private float waitTime;
 
@@ -48,6 +53,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     private bool rotateAI;
     public float rotationSpeed;
     public float distance;
+    public GameObject lineOfSightObject; 
     public LineRenderer lineOfSight; //View of AI in Stealth Mode
     public Gradient redLine; //Color of lineOfSight When Hitting Something
     public Gradient greenLine; //Color of lineOfSight When Not Hitting Anything
@@ -65,8 +71,9 @@ public class PatrollingAlgorithms : MonoBehaviour
         randomLocation = Random.Range(0, locations.Length);
         randomGeneratedLocation.transform.position = new Vector2(Random.Range(minX.transform.position.x, maxX.transform.position.x), Random.Range(minY.transform.position.y, maxY.transform.position.y));
         
-        //Start at Beginning of locations Array
+        //Start at Beginning of locations & jumpLocations Array
         nodeLocation = 0;
+        jumpNodeLocation = 0;
 
         //Set Wait Time Between Shooting Bullets
         shootTime = startShootTime;
@@ -78,6 +85,9 @@ public class PatrollingAlgorithms : MonoBehaviour
         //Ignore Collider on AI Itself
         Physics2D.queriesStartInColliders = false;
 
+        //Hide Line of Sight on Start Up
+        lineOfSightObject.SetActive(false);
+
         //Automatically Turn Off Debug Mode at Start
         debugLocationMarker.GetComponent<Renderer>().enabled = false;
     }
@@ -85,20 +95,26 @@ public class PatrollingAlgorithms : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Get Patrolling
+        //Get Patrolling Type
         GetPatrollingType();
 
-        //Check To Shoot
+        //Get Example Type
+        GetExampleType();
+
+        //Check to Shoot
         if(manager.GetComponent<PatrollingManager>().shootingMode && manager.GetComponent<PatrollingManager>().patrollingType != 6)
         {
             AIShoot();
         }
+
+        //Check to Turn On and Off lineOfSight
+        LineOfSightManager();
     }
 
     //AI Shoot
     void AIShoot()
     {
-        //Check If Stealth Mode Is On
+        //Check if Stealth Mode is On
         if (manager.GetComponent<PatrollingManager>().patrollingType == 6)
         {
             lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
@@ -120,10 +136,23 @@ public class PatrollingAlgorithms : MonoBehaviour
         }
     }
 
+    //Turn On and Off lineOfSight
+    void LineOfSightManager()
+    {
+        if(manager.GetComponent<PatrollingManager>().patrollingType == 6)
+        {
+            lineOfSightObject.SetActive(true);
+        }
+        else
+        {
+            lineOfSightObject.SetActive(false);
+        }
+    }
+
     //Get Patrolling Type
     void GetPatrollingType()
     {
-        //Call Correct Function
+        //Call Correct Patrol
         switch (manager.GetComponent<PatrollingManager>().patrollingType)
         {
             case 1:
@@ -144,14 +173,31 @@ public class PatrollingAlgorithms : MonoBehaviour
             case 6:
                 StealthPatrolAddOn();
                 break;
+            case 7:
+                JumpingPatrolAddOn();
+                break;
             default:
                 Debug.Log("NO OPTION CHOSEN");
                 break;
         }
     }
 
+    //Get Example Type
+    void GetExampleType()
+    {
+        //Play Example Scenario
+        switch(stateMachine.GetComponent<PatrollingStateMachine>().stateCounter)
+        {
+            case 1:
+                stateMachine.GetComponent<PatrollingStateMachine>().ExampleOne();
+                break;
+            default:
+                break;
+        }
+    }
+
     //Randomly Selected Patrol
-    void RandomlySelectedPatrol()
+    public void RandomlySelectedPatrol()
     {
         //Move AI & Update Debug Location
         transform.position = Vector2.MoveTowards(transform.position, locations[randomLocation].position, speed * Time.deltaTime);
@@ -174,7 +220,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     }
 
     //PreSet Patrol
-    void PreSetPatrol()
+    public void PreSetPatrol()
     {
         //Move AI & Update Debug Location
         transform.position = Vector2.MoveTowards(transform.position, locations[nodeLocation].position, speed * Time.deltaTime);
@@ -207,7 +253,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     }
 
     //Randomly Generated Patrol
-    void RandomlyGeneratedPatrol()
+    public void RandomlyGeneratedPatrol()
     {
         //Move AI & Update Debug Location
         transform.position = Vector2.MoveTowards(transform.position, randomGeneratedLocation.transform.position, speed * Time.deltaTime);
@@ -230,7 +276,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     }
 
     //Follow Patrol
-    void FollowPatrol()
+    public void FollowPatrol()
     {
         //Check Distance From Player
         if (Vector2.Distance(transform.position, player.transform.position) > 1.2f)
@@ -242,7 +288,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     }
 
     //Retreat Patrol
-    void RetreatPatrol()
+    public void RetreatPatrol()
     {
         //Check Distance From Player
         if (Vector2.Distance(transform.position, player.transform.position) < 2.5f)
@@ -254,7 +300,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     }
 
     //Stealth Patron Add-On
-    void StealthPatrolAddOn()
+    public void StealthPatrolAddOn()
     {
         //Center Character (If Wanted)
         if(centerAI)
@@ -292,5 +338,34 @@ public class PatrollingAlgorithms : MonoBehaviour
         }
 
         lineOfSight.SetPosition(0, transform.position);
+    }
+
+    //Jumping Patrol Add-On
+    public void JumpingPatrolAddOn()
+    {
+        //Rotate Sprite to Face Direction it's Moving (Right)
+        transform.eulerAngles = new Vector3(0, 0, -90);
+
+        //Update Debug Location Marker
+        debugLocationMarker.transform.position = new Vector2(jumpLocations[jumpNodeLocation].position.x, jumpLocations[jumpNodeLocation].position.y);
+
+        //Stop Once Reach End Screen
+        if (transform.position.x <= maxX.transform.position.x)
+        {
+            //Start Moving
+            transform.position += Vector3.right * speed * Time.deltaTime;
+        }
+
+        //Jump If Node Is Close Enough
+        if (Vector2.Distance(transform.position, jumpLocations[jumpNodeLocation].transform.position) < 0.5f)
+        {
+            GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, jumpHeight);
+            
+            //Update Node Array Location
+            if(jumpNodeLocation != jumpLocations.Length - 1)
+            {
+                jumpNodeLocation++;
+            }
+        }
     }
 }

@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/Shared Scenes/Main Menu.unity
+- path: Assets/Scenes/AI/PatrollingAIExamples.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
