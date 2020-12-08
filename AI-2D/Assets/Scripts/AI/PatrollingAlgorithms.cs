@@ -22,7 +22,6 @@ Notes:
 public class PatrollingAlgorithms : MonoBehaviour
 {
     //Variables
-
     //Movement Locations
     public Transform[] locations;
     private int randomLocation;
@@ -33,13 +32,14 @@ public class PatrollingAlgorithms : MonoBehaviour
     public Transform[] jumpLocations;
     private int jumpNodeLocation; //Location in jumpLocations array
     public GameObject[] platforms;
+    public GameObject walls;
 
     //AI
     public GameObject manager;
-    public GameObject stateMachine;
 
     public float speed;
     public float jumpHeight;
+    public GameObject jumpStartingLocation;
 
     public float startTime;
     private float waitTime;
@@ -67,7 +67,10 @@ public class PatrollingAlgorithms : MonoBehaviour
     void Start()
     {
         //Set AI Position
-        transform.position = locations[0].position; //Start at 1st Location Node
+        if (manager.GetComponent<PatrollingManager>().patrollingType != 7)
+        {
+            transform.position = locations[0].position; //Start at 1st Location Node
+        }
 
         //Set Wait Time Between Moving to Next Location
         waitTime = startTime;
@@ -95,6 +98,9 @@ public class PatrollingAlgorithms : MonoBehaviour
 
         //Automatically Turn Off Debug Mode at Start
         debugLocationMarker.GetComponent<Renderer>().enabled = false;
+
+        //Have Walls of on Start
+        walls.SetActive(false);
     }
 
     // Update is called once per frame
@@ -103,13 +109,20 @@ public class PatrollingAlgorithms : MonoBehaviour
         //Get Patrolling Type
         GetPatrollingType();
 
-        //Get Example Type
-        GetExampleType();
-
         //Check to Shoot
-        if(manager.GetComponent<PatrollingManager>().shootingMode && manager.GetComponent<PatrollingManager>().patrollingType != 6)
+        if(manager.GetComponent<PatrollingManager>().shootingMode)
         {
             AIShoot();
+        }
+
+        //Check for Walls
+        if(manager.GetComponent<PatrollingManager>().patrollingType == 6)
+        {
+            walls.SetActive(true);
+        }
+        else
+        {
+            walls.SetActive(false);
         }
 
         //Check to Turn On and Off lineOfSight
@@ -119,25 +132,16 @@ public class PatrollingAlgorithms : MonoBehaviour
     //AI Shoot
     void AIShoot()
     {
-        //Check if Stealth Mode is On
-        if (manager.GetComponent<PatrollingManager>().patrollingType == 6)
+        //Stop From Spamming Bullets
+        if (shootTime <= 0)
         {
             lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
             Instantiate(bullet, transform.position, Quaternion.identity);
+            shootTime = startShootTime;
         }
         else
         {
-            //Stop From Spamming Bullets
-            if (shootTime <= 0)
-            {
-                lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
-                Instantiate(bullet, transform.position, Quaternion.identity);
-                shootTime = startShootTime;
-            }
-            else
-            {
-                shootTime -= Time.deltaTime;
-            }
+            shootTime -= Time.deltaTime;
         }
     }
 
@@ -160,6 +164,7 @@ public class PatrollingAlgorithms : MonoBehaviour
         //Call Correct Patrol
         switch (manager.GetComponent<PatrollingManager>().patrollingType)
         {
+            //Patrols
             case 1:
                 RandomlySelectedPatrol();
                 break;
@@ -181,23 +186,15 @@ public class PatrollingAlgorithms : MonoBehaviour
             case 7:
                 JumpingPatrolAddOn();
                 break;
+            //State Machine Examples
+            case 8:
+                ExampleOne();
+                break;
+            case 9:
+                ExampleTwo();
+                break;
             default:
                 Debug.Log("NO OPTION CHOSEN");
-                break;
-        }
-    }
-
-    //Get Example Type
-    void GetExampleType()
-    {
-        //Play Example Scenario
-        switch(stateMachine.GetComponent<PatrollingStateMachine>().stateCounter)
-        {
-            case 1:
-                Debug.Log("Example One");
-                stateMachine.GetComponent<PatrollingStateMachine>().ExampleOne();
-                break;
-            default:
                 break;
         }
     }
@@ -231,6 +228,8 @@ public class PatrollingAlgorithms : MonoBehaviour
     //PreSet Patrol
     public void PreSetPatrol()
     {
+        Debug.Log("Preset Example One");
+
         //Move AI & Update Debug Location
         transform.position = Vector2.MoveTowards(transform.position, locations[nodeLocation].position, speed * Time.deltaTime);
         debugLocationMarker.transform.position = new Vector2(locations[nodeLocation].position.x, locations[nodeLocation].position.y);
@@ -268,10 +267,10 @@ public class PatrollingAlgorithms : MonoBehaviour
         transform.position = Vector2.MoveTowards(transform.position, randomGeneratedLocation.transform.position, speed * Time.deltaTime);
         debugLocationMarker.transform.position = new Vector2(randomGeneratedLocation.transform.position.x, randomGeneratedLocation.transform.position.y);
 
-        //Variables
+        ////Variables
         //hitInfo = Physics2D.Raycast(transform.position, randomGeneratedLocation.transform.position, distance);
 
-        //Check for Wall
+        ////Check for Wall
         //while (hitInfo.collider.CompareTag("Wall")) //If a Wall is in the Way, Get a New Location
         //{
         //    Debug.Log("Wall Detected");
@@ -298,6 +297,8 @@ public class PatrollingAlgorithms : MonoBehaviour
     //Follow Patrol
     public void FollowPatrol()
     {
+        Debug.Log("Follow Example One");
+
         //Check Distance From Player
         if (Vector2.Distance(transform.position, player.transform.position) > 1.2f)
         {
@@ -347,7 +348,11 @@ public class PatrollingAlgorithms : MonoBehaviour
             //Shoot If Detecting Player
             if(hitInfo.collider.CompareTag("DestroyableObject"))
             {
-                AIShoot();
+                for (int i = 0; i < 1; i ++)
+                {
+                    lastPosition = new Vector2(player.transform.position.x, player.transform.position.y);
+                    Instantiate(bullet, transform.position, Quaternion.identity);
+                }
             }
         }
         else
@@ -398,5 +403,43 @@ public class PatrollingAlgorithms : MonoBehaviour
             }
 
         }
+    }
+
+    //State Machine Example One: PreSet Patrol or Follow Player
+    void ExampleOne()
+    {
+        //Check Distance From Player
+        if (Vector2.Distance(transform.position, player.transform.position) < 2.5f)
+        {
+            //Move AI & Update Debug Location
+            transform.position = Vector2.MoveTowards(transform.position, player.transform.position, speed * Time.deltaTime);
+            debugLocationMarker.transform.position = new Vector2(player.transform.position.x, player.transform.position.y);
+        }
+        else 
+        {
+            //Move AI & Update Debug Location
+            transform.position = Vector2.MoveTowards(transform.position, locations[nodeLocation].position, speed * Time.deltaTime);
+            debugLocationMarker.transform.position = new Vector2(locations[nodeLocation].position.x, locations[nodeLocation].position.y);
+
+            if (Vector2.Distance(transform.position, locations[nodeLocation].position) < 0.0002f)
+            {
+                //Set Next Location
+                if (nodeLocation <= (locations.Length - 2))
+                {
+                    nodeLocation++;
+                }
+                else
+                {
+                    nodeLocation = 0;
+                }
+            }
+        }
+    }
+
+    //State Machine Example 2 - PreSet & Retreat
+    void ExampleTwo()
+    {
+        PreSetPatrol();
+        RetreatPatrol();
     }
 }

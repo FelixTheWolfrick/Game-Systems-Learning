@@ -21,14 +21,15 @@ public class PatrollingManager : MonoBehaviour
     public Button stealthPatrolAddOnButton;
     public Button jumpingPatrolAddOnButton;
 
+    public Button exampleOneButton;
+    public Button exampleTwoButton;
+
     public Button debugModeButton;
     public Button shootingModeButton;
-    public Button stateMachineExampleButton;
     public Button infoButton;
 
     public bool infoOn;
     public GameObject[] infoUI;
-    private string stateMachineScene;
 
     //Scene SetUp
     public GameObject platformerSetUp;
@@ -38,6 +39,7 @@ public class PatrollingManager : MonoBehaviour
     void Start()
     {
         //Instantiate Buttons
+        //Patrol Options
         randomPatrolButton.onClick.AddListener(RandomPatrolButtonTask);
         preSetPatrolButton.onClick.AddListener(PreSetPatrolButtonTask);
         randomGeneratedPatrolButton.onClick.AddListener(RandomGeneratedPatrolButtonTask);
@@ -46,14 +48,16 @@ public class PatrollingManager : MonoBehaviour
         stealthPatrolAddOnButton.onClick.AddListener(StealthPatrolAddOnButtonTask);
         jumpingPatrolAddOnButton.onClick.AddListener(JumpingPatrolAddOnButtonTask);
 
+        //Example Patrols (State Machine)
+        exampleOneButton.onClick.AddListener(ExampleOneButtonTask);
+        exampleTwoButton.onClick.AddListener(ExampleTwoButtonTask);
+
+        //Extra 
         debugModeButton.onClick.AddListener(DebugModeButtonTask);
         shootingModeButton.onClick.AddListener(ShootingModeButtonTask);
-        stateMachineExampleButton.onClick.AddListener(StateMachineExampleButtonTask);
         infoButton.onClick.AddListener(InfoButtonTask);
 
         infoOn = false;
-
-        stateMachineScene = "PatrollingAIExamples"; //Temp Scene
     }
 
     void Update()
@@ -118,6 +122,18 @@ public class PatrollingManager : MonoBehaviour
         patrollingType = 7;
     }
 
+    //State Machine - Example One: PreSet Path & Follow Patrol
+    void ExampleOneButtonTask()
+    {
+        patrollingType = 8;
+    }
+
+    //State Machine - Example Two: Preset Path & Retreat Patrol
+    void ExampleTwoButtonTask()
+    {
+        patrollingType = 9;
+    }
+
     //Turn On Debug Mode
     void DebugModeButtonTask()
     {
@@ -144,12 +160,6 @@ public class PatrollingManager : MonoBehaviour
         {
             shootingMode = true;
         }
-    }
-
-    //Switch to State Nachine Examples
-    void StateMachineExampleButtonTask()
-    {
-        SceneManager.LoadScene(stateMachineScene);
     }
 
     //Turn On and Off Info Boxes
