@@ -32,6 +32,7 @@ public class PatrollingAlgorithms : MonoBehaviour
     public GameObject player;
     public Transform[] jumpLocations;
     private int jumpNodeLocation; //Location in jumpLocations array
+    public GameObject[] platforms;
 
     //AI
     public GameObject manager;
@@ -53,7 +54,8 @@ public class PatrollingAlgorithms : MonoBehaviour
     private bool rotateAI;
     public float rotationSpeed;
     public float distance;
-    public GameObject lineOfSightObject; 
+    public GameObject lineOfSightObject;
+    private RaycastHit2D hitInfo;
     public LineRenderer lineOfSight; //View of AI in Stealth Mode
     public Gradient redLine; //Color of lineOfSight When Hitting Something
     public Gradient greenLine; //Color of lineOfSight When Not Hitting Anything
@@ -64,6 +66,9 @@ public class PatrollingAlgorithms : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        //Set AI Position
+        transform.position = locations[0].position; //Start at 1st Location Node
+
         //Set Wait Time Between Moving to Next Location
         waitTime = startTime;
 
@@ -189,6 +194,7 @@ public class PatrollingAlgorithms : MonoBehaviour
         switch(stateMachine.GetComponent<PatrollingStateMachine>().stateCounter)
         {
             case 1:
+                Debug.Log("Example One");
                 stateMachine.GetComponent<PatrollingStateMachine>().ExampleOne();
                 break;
             default:
@@ -202,6 +208,9 @@ public class PatrollingAlgorithms : MonoBehaviour
         //Move AI & Update Debug Location
         transform.position = Vector2.MoveTowards(transform.position, locations[randomLocation].position, speed * Time.deltaTime);
         debugLocationMarker.transform.position = new Vector2(locations[randomLocation].position.x, locations[randomLocation].position.y);
+
+        //Variables
+        RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.up, distance);
 
         //Wait To Move Again
         if (Vector2.Distance(transform.position, locations[randomLocation].position) < 0.0002f)
@@ -259,6 +268,17 @@ public class PatrollingAlgorithms : MonoBehaviour
         transform.position = Vector2.MoveTowards(transform.position, randomGeneratedLocation.transform.position, speed * Time.deltaTime);
         debugLocationMarker.transform.position = new Vector2(randomGeneratedLocation.transform.position.x, randomGeneratedLocation.transform.position.y);
 
+        //Variables
+        //hitInfo = Physics2D.Raycast(transform.position, randomGeneratedLocation.transform.position, distance);
+
+        //Check for Wall
+        //while (hitInfo.collider.CompareTag("Wall")) //If a Wall is in the Way, Get a New Location
+        //{
+        //    Debug.Log("Wall Detected");
+        //    randomGeneratedLocation.transform.position = new Vector2(Random.Range(minX.transform.position.x, maxX.transform.position.x), Random.Range(minY.transform.position.y, maxY.transform.position.y)); //Get New Location
+        //    hitInfo = Physics2D.Raycast(transform.position, randomGeneratedLocation.transform.position, distance);
+        //}
+
         //Wait To Move Again
         if (Vector2.Distance(transform.position, randomGeneratedLocation.transform.position) < 0.0002f)
         {
@@ -315,7 +335,7 @@ public class PatrollingAlgorithms : MonoBehaviour
         }
 
         //Variables
-        RaycastHit2D hitInfo = Physics2D.Raycast(transform.position, transform.up, distance);
+        hitInfo = Physics2D.Raycast(transform.position, transform.up, distance);
 
         //Check If Hits Something
         if(hitInfo.collider != null)
@@ -359,13 +379,24 @@ public class PatrollingAlgorithms : MonoBehaviour
         //Jump If Node Is Close Enough
         if (Vector2.Distance(transform.position, jumpLocations[jumpNodeLocation].transform.position) < 0.5f)
         {
-            GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, jumpHeight);
-            
+            //Check Distance from Platform
+            if (Vector2.Distance(transform.position, platforms[jumpNodeLocation].transform.position) < 4.7f)
+            {
+                jumpHeight = 6;
+                GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, jumpHeight);
+            }
+            else if(Vector2.Distance(transform.position, platforms[jumpNodeLocation].transform.position) > 4.7f)
+            {
+                jumpHeight = 9;
+                GetComponent<Rigidbody2D>().velocity = new Vector2(GetComponent<Rigidbody2D>().velocity.x, jumpHeight);
+            }
+
             //Update Node Array Location
             if(jumpNodeLocation != jumpLocations.Length - 1)
             {
                 jumpNodeLocation++;
             }
+
         }
     }
 }

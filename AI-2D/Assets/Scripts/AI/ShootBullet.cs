@@ -36,10 +36,11 @@ public class ShootBullet : MonoBehaviour
     }
 
     //Check Colliding With Object
-    private void OnTriggerEnter2D(Collider2D other)
+    void OnCollisionEnter2D(Collision2D other)
     {
-        if(other.CompareTag("DestroyableObject"))
+        if (other.gameObject.CompareTag("DestroyableObject") || other.gameObject.CompareTag("Wall"))
         {
+            Debug.Log("Bullet Hit");
             Destroy(gameObject);
         }
     }

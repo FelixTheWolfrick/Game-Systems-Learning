@@ -28,7 +28,7 @@ public class PatrollingStateMachine : MonoBehaviour
     //Example One - AI wanders to random points and follows player when within range
     public void ExampleOne()
     {
-        aiObject.GetComponent<PatrollingAlgorithms>().RandomlyGeneratedPatrol();
+        aiObject.GetComponent<PatrollingAlgorithms>().PreSetPatrol();
         aiObject.GetComponent<PatrollingAlgorithms>().FollowPatrol();
     }
 
