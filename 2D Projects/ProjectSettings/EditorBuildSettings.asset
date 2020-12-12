@@ -9,12 +9,15 @@ EditorBuildSettings:
     path: Assets/Scenes/AI/PatrollingAI.unity
     guid: 2cda990e2423bbf4892e6590ba056729
   - enabled: 1
-    path: Assets/Scenes/Shared Scenes/Main Menu.unity
+    path: Assets/Scenes/Main Menu/Main Menu.unity
     guid: c2459873407cf0a41a67f87f94edde2d
   - enabled: 1
-    path: Assets/Scenes/Shared Scenes/AI Options.unity
+    path: Assets/Scenes/Main Menu/AI Options.unity
     guid: fc463985362e5b241b8d9234b6b3182d
+  - enabled: 0
+    path: 
+    guid: 00000000000000000000000000000000
   - enabled: 1
-    path: Assets/Scenes/AI/PatrollingAIExamples.unity
-    guid: 83c5599ee2d1ade47921d6ebb8468e25
+    path: Assets/Scenes/Scriptable Objects/Scriptable Objects.unity
+    guid: 804fc1148e16fcb48989f7f47bf91eed
   m_configObjects: {}
