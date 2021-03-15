@@ -3,4 +3,6 @@ Git file that holds one big unity project that I use to learn how to program new
 
 They'll all be stored here for easy reference and sharing.
 
-Currently just used for AI Final (will use it for the above purpose as well in the future)
+# Includes:
+- AI Patrolling Algorithms
+- Basic Scriptable Objects
